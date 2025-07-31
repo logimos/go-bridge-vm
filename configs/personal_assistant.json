@@ -1,0 +1,536 @@
+{
+  "domain": "personal_assistant",
+  "version": "1.0.0",
+  "intents": {
+    "CreateContact": {
+      "description": "Create a new contact or person",
+      "keywords": ["create", "add", "new", "save", "store", "insert"],
+      "phrases": [
+        "create a new contact",
+        "add contact",
+        "new person",
+        "save contact info",
+        "add someone to contacts",
+        "create contact for",
+        "save new contact",
+        "add a new person",
+        "store contact information",
+        "create a contact entry",
+        "add to my contacts",
+        "save someone's details",
+        "create contact entry for",
+        "add person to contacts",
+        "store someone's info",
+        "create a new person entry",
+        "add contact details",
+        "save person information",
+        "create contact record",
+        "add to address book"
+      ],
+      "regex": [
+        "(?i)(create|add|new|save|store)\\s+(?:a\\s+)?(?:new\\s+)?(?:contact|person|entry)",
+        "(?i)(?:add|save|store)\\s+(?:someone|person)\\s+(?:to\\s+)?(?:contacts|address\\s+book)",
+        "(?i)create\\s+(?:a\\s+)?(?:new\\s+)?(?:contact|person)\\s+(?:entry\\s+)?(?:for\\s+)?([a-zA-Z\\s]+)"
+      ],
+      "priority": 10,
+      "variables": ["name", "email", "phone", "company"],
+      "required": ["name"],
+      "examples": [
+        "create a new contact named John Smith",
+        "add contact Alice with email alice@example.com",
+        "save contact info for Bob Johnson",
+        "add someone to contacts named Sarah Wilson"
+      ],
+      "follow_up": [
+        "What's the name of the contact?",
+        "Do you have an email address for this contact?",
+        "Do you have a phone number for this contact?"
+      ]
+    },
+    "UpdateContact": {
+      "description": "Update or modify existing contact information",
+      "keywords": ["update", "edit", "modify", "change", "alter"],
+      "phrases": [
+        "update contact details",
+        "edit contact",
+        "modify contact",
+        "change contact info",
+        "update phone number",
+        "edit email address",
+        "modify contact details",
+        "change someone's details",
+        "update contact information",
+        "edit person's info",
+        "modify contact entry",
+        "change contact data",
+        "update someone's contact",
+        "edit contact record",
+        "modify person details",
+        "change contact entry",
+        "update contact info",
+        "edit someone's details",
+        "modify contact data",
+        "change person's info"
+      ],
+      "regex": [
+        "(?i)(update|edit|modify|change)\\s+(?:contact|person|someone's)\\s+(?:details|info|information|data)",
+        "(?i)(update|edit|modify|change)\\s+(?:phone\\s+number|email\\s+address)",
+        "(?i)(?:edit|modify|change)\\s+(?:contact|person)\\s+(?:entry|record)"
+      ],
+      "priority": 9,
+      "variables": ["name", "email", "phone", "company"],
+      "examples": [
+        "update contact details for John",
+        "edit email address for Alice",
+        "modify contact info for Bob Johnson"
+      ]
+    },
+    "DeleteContact": {
+      "description": "Delete or remove a contact",
+      "keywords": ["delete", "remove", "drop", "erase", "clear"],
+      "phrases": [
+        "delete contact",
+        "remove contact",
+        "remove from contacts",
+        "delete person",
+        "remove contact info",
+        "delete contact entry",
+        "remove someone from contacts",
+        "delete person entry",
+        "remove contact record",
+        "delete someone's contact",
+        "remove from address book",
+        "delete contact information",
+        "remove person details",
+        "delete contact data",
+        "remove someone's info",
+        "delete person record",
+        "remove contact entry",
+        "delete someone's details",
+        "remove person info",
+        "delete contact record"
+      ],
+      "regex": [
+        "(?i)(delete|remove|drop|erase)\\s+(?:contact|person|someone's)\\s+(?:info|information|data|entry|record)",
+        "(?i)(delete|remove)\\s+(?:from\\s+)?(?:contacts|address\\s+book)",
+        "(?i)(?:delete|remove)\\s+(?:contact|person)\\s+(?:entry\\s+)?(?:for\\s+)?([a-zA-Z\\s]+)"
+      ],
+      "priority": 8,
+      "variables": ["name"],
+      "examples": [
+        "delete contact John Smith",
+        "remove Alice from contacts",
+        "delete person entry for Bob"
+      ]
+    },
+    "ShowContact": {
+      "description": "Show or find contact information",
+      "keywords": ["show", "find", "search", "look", "get", "display"],
+      "phrases": [
+        "show contact details",
+        "get contact information",
+        "find contact",
+        "look up contact",
+        "display contact info",
+        "show contact for",
+        "get details for",
+        "find someone's contact",
+        "show person details",
+        "get contact info",
+        "look up someone",
+        "display contact details",
+        "show someone's contact",
+        "find person info",
+        "get contact data",
+        "show contact record",
+        "look up person",
+        "display someone's info",
+        "show contact information",
+        "find contact details"
+      ],
+      "regex": [
+        "(?i)(show|find|search|look\\s+up|get|display)\\s+(?:contact|person|someone's)\\s+(?:details|info|information|data|record)",
+        "(?i)(?:show|find|get|display)\\s+(?:contact|person)\\s+(?:for\\s+)?([a-zA-Z\\s]+)",
+        "(?i)look\\s+up\\s+(?:contact|person)\\s+(?:for\\s+)?([a-zA-Z\\s]+)"
+      ],
+      "priority": 7,
+      "variables": ["name"],
+      "examples": [
+        "show contact details for John",
+        "find contact Alice Smith",
+        "get contact info for Bob"
+      ]
+    },
+    "CreateTask": {
+      "description": "Create a new task or todo item",
+      "keywords": ["create", "add", "new", "make", "set"],
+      "phrases": [
+        "create new task",
+        "add a task",
+        "new task",
+        "create todo",
+        "add todo item",
+        "create reminder task",
+        "add task to list",
+        "new todo item",
+        "create a new task",
+        "add task",
+        "create to-do",
+        "add to my tasks",
+        "create new todo",
+        "add task item",
+        "create a todo",
+        "add to task list",
+        "create new to-do item",
+        "add reminder task",
+        "create task entry",
+        "add to my todos"
+      ],
+      "regex": [
+        "(?i)(create|add|new|make)\\s+(?:a\\s+)?(?:new\\s+)?(?:task|todo|to-do|reminder)",
+        "(?i)(?:add|create)\\s+(?:task|todo)\\s+(?:item\\s+)?(?:to\\s+)?(?:list|my\\s+tasks|my\\s+todos)",
+        "(?i)create\\s+(?:a\\s+)?(?:new\\s+)?(?:task|todo)\\s+(?:entry\\s+)?(?:for\\s+)?([a-zA-Z\\s]+)"
+      ],
+      "priority": 9,
+      "variables": ["title", "description", "due_date", "priority"],
+      "required": ["title"],
+      "examples": [
+        "create new task called buy groceries",
+        "add todo item for meeting preparation",
+        "create reminder task for doctor appointment"
+      ],
+      "follow_up": [
+        "What's the title of the task?",
+        "Do you have a description for this task?",
+        "When is this task due?"
+      ]
+    },
+    "ShowMeTodaysTasks": {
+      "description": "Show tasks for today",
+      "keywords": ["today", "daily", "now", "current"],
+      "phrases": [
+        "what's today's tasks",
+        "tasks for today",
+        "today tasks",
+        "show today todos",
+        "what do I need to do today",
+        "today schedule",
+        "daily tasks",
+        "show today's tasks",
+        "what tasks for today",
+        "today's todo list",
+        "show today's todos",
+        "what do I have today",
+        "today's task list",
+        "show daily tasks",
+        "what's on today",
+        "today's schedule",
+        "show today's schedule",
+        "what tasks today",
+        "today's to-do list",
+        "show today's agenda"
+      ],
+      "regex": [
+        "(?i)(?:what's|what\\s+is)\\s+(?:today's|today)\\s+(?:tasks|todos|schedule|agenda)",
+        "(?i)(?:show|get|display)\\s+(?:today's|today)\\s+(?:tasks|todos|schedule|agenda)",
+        "(?i)(?:what\\s+do\\s+I\\s+need\\s+to\\s+do|what\\s+do\\s+I\\s+have)\\s+today",
+        "(?i)tasks\\s+(?:for\\s+)?today"
+      ],
+      "priority": 8,
+      "variables": ["date"],
+      "examples": [
+        "what's today's tasks",
+        "show today's schedule",
+        "what do I need to do today"
+      ]
+    },
+    "CreateEvent": {
+      "description": "Create a calendar event or meeting",
+      "keywords": ["create", "add", "schedule", "book", "set"],
+      "phrases": [
+        "create calendar event",
+        "add new event",
+        "schedule event",
+        "create meeting",
+        "add calendar entry",
+        "schedule appointment",
+        "create calendar item",
+        "add event to calendar",
+        "schedule meeting",
+        "create appointment",
+        "add calendar event",
+        "schedule calendar entry",
+        "create new meeting",
+        "add event",
+        "schedule new event",
+        "create calendar meeting",
+        "add appointment",
+        "schedule calendar item",
+        "create new appointment",
+        "add meeting to calendar"
+      ],
+      "regex": [
+        "(?i)(create|add|schedule|book)\\s+(?:a\\s+)?(?:new\\s+)?(?:calendar\\s+)?(?:event|meeting|appointment)",
+        "(?i)(?:add|create)\\s+(?:event|meeting|appointment)\\s+(?:to\\s+)?(?:calendar)",
+        "(?i)schedule\\s+(?:a\\s+)?(?:new\\s+)?(?:event|meeting|appointment)"
+      ],
+      "priority": 9,
+      "variables": ["title", "date", "time", "duration", "location"],
+      "required": ["title", "date", "time"],
+      "examples": [
+        "create calendar event for team meeting",
+        "schedule appointment with doctor",
+        "add meeting to calendar for tomorrow"
+      ],
+      "follow_up": [
+        "What should I call this event?",
+        "When should this event be scheduled?",
+        "What time should this event be?"
+      ]
+    },
+    "CreateNote": {
+      "description": "Create a new note or memo",
+      "keywords": ["create", "add", "write", "take", "make"],
+      "phrases": [
+        "create note",
+        "add note",
+        "new note",
+        "write note",
+        "take note",
+        "create memo",
+        "add memo",
+        "write down",
+        "create a note",
+        "add a note",
+        "write a note",
+        "take a note",
+        "create new note",
+        "add new note",
+        "write new note",
+        "create a memo",
+        "add a memo",
+        "write a memo",
+        "create note entry",
+        "add note entry"
+      ],
+      "regex": [
+        "(?i)(create|add|write|take|make)\\s+(?:a\\s+)?(?:new\\s+)?(?:note|memo)",
+        "(?i)write\\s+down\\s+(?:a\\s+)?(?:note|memo)",
+        "(?i)create\\s+(?:note|memo)\\s+(?:entry\\s+)?(?:for\\s+)?([a-zA-Z\\s]+)"
+      ],
+      "priority": 8,
+      "variables": ["title", "content", "tags"],
+      "examples": [
+        "create note about project ideas",
+        "write memo for team meeting",
+        "take note of important points"
+      ]
+    },
+    "Weather": {
+      "description": "Get weather information",
+      "keywords": ["weather", "forecast", "temperature", "climate"],
+      "phrases": [
+        "weather",
+        "weather forecast",
+        "what is the weather",
+        "weather today",
+        "weather report",
+        "forecast",
+        "weather conditions",
+        "what's the weather",
+        "weather forecast today",
+        "current weather",
+        "weather now",
+        "today's weather",
+        "weather prediction",
+        "what's the forecast",
+        "weather outlook",
+        "current forecast",
+        "weather information",
+        "what's the weather like",
+        "weather details",
+        "weather summary"
+      ],
+      "regex": [
+        "(?i)(?:what's|what\\s+is)\\s+(?:the\\s+)?(?:weather|forecast)",
+        "(?i)(?:show|get|display)\\s+(?:weather|forecast)",
+        "(?i)(?:weather|forecast)\\s+(?:today|now|current)",
+        "(?i)(?:what's|what\\s+is)\\s+(?:the\\s+)?(?:weather\\s+like)"
+      ],
+      "priority": 7,
+      "variables": ["location", "date"],
+      "examples": [
+        "what's the weather today",
+        "show weather forecast",
+        "what's the weather like in New York"
+      ]
+    },
+    "Time": {
+      "description": "Get current time or date",
+      "keywords": ["time", "date", "now", "current"],
+      "phrases": [
+        "what time",
+        "current time",
+        "time now",
+        "what is the time",
+        "show time",
+        "current date time",
+        "what time is it",
+        "time right now",
+        "current time now",
+        "what's the time",
+        "show current time",
+        "time currently",
+        "what time is it now",
+        "current date and time",
+        "show date and time",
+        "what's the current time",
+        "time at the moment",
+        "current time right now",
+        "what time is it currently",
+        "show current date time"
+      ],
+      "regex": [
+        "(?i)(?:what's|what\\s+is)\\s+(?:the\\s+)?(?:time|current\\s+time)",
+        "(?i)(?:show|get|display)\\s+(?:time|current\\s+time|date\\s+and\\s+time)",
+        "(?i)(?:what\\s+time\\s+is\\s+it|time\\s+(?:now|currently|right\\s+now))",
+        "(?i)(?:current|now)\\s+(?:time|date\\s+and\\s+time)"
+      ],
+      "priority": 6,
+      "variables": ["timezone"],
+      "examples": [
+        "what time is it",
+        "show current time",
+        "what's the current date and time"
+      ]
+    },
+    "Calculator": {
+      "description": "Perform mathematical calculations",
+      "keywords": ["calculate", "math", "compute", "solve", "calculate"],
+      "phrases": [
+        "calculate",
+        "math",
+        "compute",
+        "solve",
+        "calculate this",
+        "do math",
+        "solve equation",
+        "compute result",
+        "calculate math",
+        "do calculation",
+        "solve math",
+        "compute math",
+        "calculate equation",
+        "do math calculation",
+        "solve calculation",
+        "compute equation",
+        "calculate result",
+        "do math problem",
+        "solve math problem",
+        "compute calculation"
+      ],
+      "regex": [
+        "(?i)(calculate|compute|solve)\\s+(?:this|math|equation|result)",
+        "(?i)(?:do|perform)\\s+(?:math|calculation|computation)",
+        "(?i)(?:calculate|compute|solve)\\s+([0-9\\+\\-\\*\\/\\(\\)\\s\\.]+)"
+      ],
+      "priority": 8,
+      "variables": ["expression", "operation"],
+      "examples": [
+        "calculate 2 + 2",
+        "solve math problem",
+        "compute 15 * 3"
+      ]
+    }
+  },
+  "entities": {
+    "name": {
+      "type": "name",
+      "description": "Person's name",
+      "regex": [
+        "(?i)(?:named\\s+|name\\s+is\\s+|call(?:ed)?\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+        "(?i)(?:contact|person)\\s+([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+        "(?i)(?:for\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)"
+      ],
+      "keywords": ["named", "name", "called", "contact", "person"],
+      "examples": ["John Smith", "Alice", "Bob Johnson"]
+    },
+    "email": {
+      "type": "email",
+      "description": "Email address",
+      "regex": [
+        "(?i)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+        "(?i)(?:email|e-mail)\\s+(?:is\\s+)?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})"
+      ],
+      "keywords": ["email", "e-mail", "mail"],
+      "examples": ["john@example.com", "alice.smith@company.org"]
+    },
+    "phone": {
+      "type": "phone",
+      "description": "Phone number",
+      "regex": [
+        "(?i)(\\+?\\d{1,3}[-.\\s]?)?\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}",
+        "(?i)(?:phone|mobile|cell)\\s+(?:number\\s+)?(\\+?\\d{1,3}[-.\\s]?)?\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}"
+      ],
+      "keywords": ["phone", "telephone", "mobile", "cell"],
+      "examples": ["555-123-4567", "+1 (555) 123-4567"]
+    },
+    "date": {
+      "type": "date",
+      "description": "Date or time reference",
+      "regex": [
+        "(?i)(today|tomorrow|yesterday|next\\s+week|last\\s+week)",
+        "(?i)(\\d{1,2}/\\d{1,2}/\\d{4})",
+        "(?i)(\\d{1,2}-\\d{1,2}-\\d{4})"
+      ],
+      "keywords": ["today", "tomorrow", "yesterday", "date", "when"],
+      "examples": ["today", "tomorrow", "12/25/2024"]
+    },
+    "time": {
+      "type": "time",
+      "description": "Time reference",
+      "regex": [
+        "(?i)(\\d{1,2}:\\d{2}\\s*(?:AM|PM|am|pm)?)",
+        "(?i)(\\d{1,2}\\s*(?:AM|PM|am|pm))"
+      ],
+      "keywords": ["time", "at", "when"],
+      "examples": ["2:30 PM", "14:30", "3 o'clock"]
+    },
+    "location": {
+      "type": "location",
+      "description": "Location or place",
+      "regex": [
+        "(?i)(?:in\\s+|at\\s+|location\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+        "(?i)(?:weather\\s+in\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)"
+      ],
+      "keywords": ["in", "at", "location", "place"],
+      "examples": ["New York", "San Francisco", "London"]
+    }
+  },
+  "synonyms": {
+    "create": ["add", "new", "make", "set", "establish", "build"],
+    "find": ["search", "look", "locate", "get", "retrieve", "discover"],
+    "update": ["change", "modify", "edit", "alter", "revise", "adjust"],
+    "delete": ["remove", "drop", "erase", "clear", "eliminate", "destroy"],
+    "show": ["display", "get", "view", "see", "list", "present"],
+    "task": ["todo", "to-do", "item", "job", "work", "assignment"],
+    "event": ["meeting", "appointment", "session", "gathering"],
+    "note": ["memo", "message", "record", "entry", "document"],
+    "weather": ["forecast", "climate", "conditions", "temperature"],
+    "time": ["clock", "hour", "moment", "period", "duration"],
+    "calculate": ["compute", "solve", "math", "figure", "determine"]
+  },
+  "confidence": {
+    "CreateContact": 0.7,
+    "UpdateContact": 0.6,
+    "DeleteContact": 0.6,
+    "ShowContact": 0.6,
+    "CreateTask": 0.7,
+    "ShowMeTodaysTasks": 0.8,
+    "CreateEvent": 0.7,
+    "CreateNote": 0.6,
+    "Weather": 0.8,
+    "Time": 0.9,
+    "Calculator": 0.7
+  }
+} 
