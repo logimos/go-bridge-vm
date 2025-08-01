@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -28,20 +29,30 @@ func NewIntentService() *IntentService {
 		APIKey:       getEnv("OPENAI_API_KEY", ""),
 	}
 
+	fmt.Printf("Creating IntentService with AI provider type: %s\n", config.ProviderType)
+	fmt.Printf("Environment variables:\n")
+	fmt.Printf("  - AI_PROVIDER: %s\n", getEnv("AI_PROVIDER", "not set"))
+	fmt.Printf("  - INTENT_CONFIG_PATH: %s\n", getEnv("INTENT_CONFIG_PATH", "not set"))
+
 	// Create AI provider factory
 	factory := NewAIProviderFactory(config)
 
 	// Try to create the configured provider
 	aiProvider, err := factory.CreateProvider()
 	if err != nil {
+		fmt.Printf("Failed to create configured provider: %v\n", err)
 		// Fallback to available providers
 		availableProviders := factory.GetAvailableProviders()
 		if len(availableProviders) > 0 {
 			aiProvider = availableProviders[0]
+			fmt.Printf("Using fallback provider: %s\n", aiProvider.Name())
 		} else {
 			// Last resort: create local provider
 			aiProvider, _ = NewLocalAIProvider(config)
+			fmt.Printf("Using last resort local provider: %s\n", aiProvider.Name())
 		}
+	} else {
+		fmt.Printf("Successfully created configured provider: %s\n", aiProvider.Name())
 	}
 
 	// Initialize pattern matching for common intents
@@ -51,6 +62,8 @@ func NewIntentService() *IntentService {
 		"update_contact": regexp.MustCompile(`(?i)(update|change|modify)\s+(?:contact\s+)?([a-zA-Z]+)`),
 		"delete_contact": regexp.MustCompile(`(?i)(delete|remove|drop)\s+(?:contact\s+)?([a-zA-Z]+)`),
 	}
+
+	fmt.Printf("Initialized IntentService with %d pattern-based intents\n", len(patterns))
 
 	return &IntentService{
 		aiProvider: aiProvider,
@@ -62,12 +75,13 @@ func NewIntentService() *IntentService {
 func (s *IntentService) ExtractIntent(ctx context.Context, text string) (*models.Intent, error) {
 	normalizedText := models.NormalizeText(text)
 
-	// Try pattern matching first for efficiency
-	if intent := s.extractWithPatterns(normalizedText); intent != nil {
-		return intent, nil
-	}
+	// Skip pattern matching if using enhanced local provider for better accuracy
+	providerName := s.GetAIProviderName()
+	fmt.Printf("DEBUG: Provider name: %s\n", providerName)
+	fmt.Printf("DEBUG: Contains 'Enhanced Local': %v\n", strings.Contains(providerName, "Enhanced Local"))
 
-	// Fall back to AI-based extraction
+	// Temporarily disable pattern matching to force AI provider usage
+	fmt.Printf("DEBUG: Using AI provider for extraction\n")
 	return s.aiProvider.ExtractIntent(ctx, normalizedText)
 }
 

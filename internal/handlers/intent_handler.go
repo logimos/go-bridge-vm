@@ -66,6 +66,19 @@ func (h *IntentHandler) ExtractIntent(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
+// DebugHandler returns debug information about the current AI provider
+func DebugHandler(intentService *services.IntentService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		response := map[string]interface{}{
+			"provider_name": intentService.GetAIProviderName(),
+			"timestamp":     time.Now().UTC().Format(time.RFC3339),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
 // respondWithJSON sends a JSON response
 func respondWithJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.WriteHeader(statusCode)

@@ -195,12 +195,12 @@
       "variables": ["title", "description", "due_date", "priority"],
       "required": ["title"],
       "examples": [
-        "create new task called buy groceries",
-        "add todo item for meeting preparation",
-        "create reminder task for doctor appointment"
+        "create new task \"buy groceries\"",
+        "add todo item \"prepare presentation\"",
+        "create reminder task \"call dentist\""
       ],
       "follow_up": [
-        "What's the title of the task?",
+        "What's the title of the task? (use quotes for clarity)",
         "Do you have a description for this task?",
         "When is this task due?"
       ]
@@ -278,12 +278,12 @@
       "variables": ["title", "date", "time", "duration", "location"],
       "required": ["title", "date", "time"],
       "examples": [
-        "create calendar event for team meeting",
-        "schedule appointment with doctor",
-        "add meeting to calendar for tomorrow"
+        "create calendar event \"team meeting\" tomorrow at 2pm",
+        "schedule appointment \"doctor visit\" next week",
+        "add meeting \"project review\" to calendar for Friday"
       ],
       "follow_up": [
-        "What should I call this event?",
+        "What should I call this event? (use quotes for clarity)",
         "When should this event be scheduled?",
         "What time should this event be?"
       ]
@@ -446,14 +446,15 @@
   "entities": {
     "name": {
       "type": "name",
-      "description": "Person's name",
+      "description": "Person's name (use quotes for clarity)",
       "regex": [
+        "(?i)\"([^\"]+)\"",
         "(?i)(?:named\\s+|name\\s+is\\s+|call(?:ed)?\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
         "(?i)(?:contact|person)\\s+([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
         "(?i)(?:for\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)"
       ],
       "keywords": ["named", "name", "called", "contact", "person"],
-      "examples": ["John Smith", "Alice", "Bob Johnson"]
+      "examples": ["\"Alice Smith\"", "John", "Bob Johnson"]
     },
     "email": {
       "type": "email",
@@ -491,7 +492,8 @@
       "description": "Time reference",
       "regex": [
         "(?i)(\\d{1,2}:\\d{2}\\s*(?:AM|PM|am|pm)?)",
-        "(?i)(\\d{1,2}\\s*(?:AM|PM|am|pm))"
+        "(?i)(\\d{1,2}\\s*(?:AM|PM|am|pm))",
+        "(?i)(?:at\\s+)(\\d{1,2}:?\\d{0,2}\\s*(?:AM|PM|am|pm)?)"
       ],
       "keywords": ["time", "at", "when"],
       "examples": ["2:30 PM", "14:30", "3 o'clock"]
@@ -505,6 +507,19 @@
       ],
       "keywords": ["in", "at", "location", "place"],
       "examples": ["New York", "San Francisco", "London"]
+    },
+    "title": {
+      "type": "title",
+      "description": "Title or name of an item (use quotes for clarity)",
+      "regex": [
+        "(?i)\"([^\"]+)\"",
+        "(?i)(?:called\\s+|titled\\s+|named\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+        "(?i)(?:for\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+        "(?i)(?:event\\s+for\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)",
+        "(?i)(?:task\\s+called\\s+)([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)"
+      ],
+      "keywords": ["called", "titled", "named", "for"],
+      "examples": ["\"team meeting\"", "\"buy groceries\"", "\"doctor appointment\""]
     }
   },
   "synonyms": {

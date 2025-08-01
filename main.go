@@ -42,6 +42,7 @@ func main() {
 	api := router.PathPrefix("/api/v1").Subrouter()
 	api.HandleFunc("/intent", intentHandler.ExtractIntent).Methods("POST")
 	api.HandleFunc("/health", handlers.HealthCheck).Methods("GET")
+	api.HandleFunc("/debug", handlers.DebugHandler(intentService)).Methods("GET")
 
 	// Middleware
 	router.Use(handlers.LoggingMiddleware)

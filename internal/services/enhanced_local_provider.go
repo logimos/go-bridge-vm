@@ -34,12 +34,30 @@ func NewEnhancedLocalProvider(configPath string) (AIProvider, error) {
 
 	// Try to load from file, fallback to default
 	if configPath != "" {
+		fmt.Printf("Loading intent configuration from: %s\n", configPath)
 		config, err = models.LoadIntentConfig(configPath)
 		if err != nil {
+			fmt.Printf("Failed to load config from %s: %v\n", configPath, err)
 			return nil, fmt.Errorf("failed to load config from %s: %w", configPath, err)
 		}
+		fmt.Printf("Successfully loaded configuration with domain: %s\n", config.Domain)
 	} else {
+		fmt.Printf("No config path provided, using default configuration\n")
 		config = models.GetDefaultConfig()
+		fmt.Printf("Using default configuration with domain: %s\n", config.Domain)
+	}
+
+	// Log available intents
+	fmt.Printf("Available intents (%d):\n", len(config.Intents))
+	for intentName, intent := range config.Intents {
+		fmt.Printf("  - %s: %s (priority: %d, required: %v)\n",
+			intentName, intent.Description, intent.Priority, intent.Required)
+	}
+
+	// Log available entities
+	fmt.Printf("Available entities (%d):\n", len(config.Entities))
+	for entityName, entity := range config.Entities {
+		fmt.Printf("  - %s: %s\n", entityName, entity.Description)
 	}
 
 	// Compile patterns for performance
@@ -47,6 +65,8 @@ func NewEnhancedLocalProvider(configPath string) (AIProvider, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to compile config: %w", err)
 	}
+
+	fmt.Printf("Configuration compilation completed successfully\n")
 
 	return &EnhancedLocalProvider{
 		config:     config,
@@ -178,7 +198,9 @@ func (p *EnhancedLocalProvider) generateFollowUpQuestion(intentName, field strin
 	// Generate default questions based on field type
 	switch field {
 	case "title":
-		return "What should I call this " + strings.ToLower(intentName) + "?"
+		// Use a more natural intent name for the question
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "What should I call this " + intentDisplayName + "?"
 	case "name":
 		return "What's the name?"
 	case "email":
@@ -186,19 +208,56 @@ func (p *EnhancedLocalProvider) generateFollowUpQuestion(intentName, field strin
 	case "phone":
 		return "What's the phone number?"
 	case "date":
-		return "When should this " + strings.ToLower(intentName) + " be scheduled?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "When should this " + intentDisplayName + " be scheduled?"
 	case "time":
-		return "What time should this " + strings.ToLower(intentName) + " be?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "What time should this " + intentDisplayName + " be?"
 	case "duration":
-		return "How long should this " + strings.ToLower(intentName) + " last?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "How long should this " + intentDisplayName + " last?"
 	case "location":
-		return "Where should this " + strings.ToLower(intentName) + " take place?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "Where should this " + intentDisplayName + " take place?"
 	case "description":
-		return "Can you provide more details about this " + strings.ToLower(intentName) + "?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "Can you provide more details about this " + intentDisplayName + "?"
 	case "priority":
-		return "What priority should this " + strings.ToLower(intentName) + " have?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "What priority should this " + intentDisplayName + " have?"
 	default:
-		return "What " + field + " should I use for this " + strings.ToLower(intentName) + "?"
+		intentDisplayName := p.getIntentDisplayName(intentName)
+		return "What " + field + " should I use for this " + intentDisplayName + "?"
+	}
+}
+
+// getIntentDisplayName converts intent names to user-friendly display names
+func (p *EnhancedLocalProvider) getIntentDisplayName(intentName string) string {
+	switch intentName {
+	case "CreateEvent":
+		return "event"
+	case "CreateTask":
+		return "task"
+	case "CreateContact":
+		return "contact"
+	case "CreateNote":
+		return "note"
+	case "Weather":
+		return "weather"
+	case "Time":
+		return "time"
+	case "Calculator":
+		return "calculation"
+	default:
+		// Convert camelCase to lowercase with spaces
+		result := ""
+		for i, char := range intentName {
+			if i > 0 && unicode.IsUpper(char) {
+				result += " "
+			}
+			result += string(unicode.ToLower(char))
+		}
+		return result
 	}
 }
 
@@ -316,7 +375,56 @@ func (p *EnhancedLocalProvider) calculateIntentScore(text, intentName string, in
 func (p *EnhancedLocalProvider) extractEntities(text string) map[string]string {
 	entities := make(map[string]string)
 
+	// Extract name first (can be quoted)
 	for entityName, entity := range p.config.Entities {
+		if entityName == "name" {
+			// Try regex patterns first
+			for _, re := range p.compiled.EntityRegexes[entityName] {
+				matches := re.FindStringSubmatch(text)
+				if len(matches) > 1 {
+					entities[entityName] = matches[1]
+					break
+				}
+			}
+
+			// If no regex match, try keyword-based extraction
+			if entities[entityName] == "" {
+				value := p.extractEntityByKeywords(text, entityName, entity)
+				if value != "" {
+					entities[entityName] = value
+				}
+			}
+		}
+	}
+
+	// Extract title (can be quoted, but don't override name)
+	for entityName, entity := range p.config.Entities {
+		if entityName == "title" {
+			// Try regex patterns first
+			for _, re := range p.compiled.EntityRegexes[entityName] {
+				matches := re.FindStringSubmatch(text)
+				if len(matches) > 1 {
+					entities[entityName] = matches[1]
+					break
+				}
+			}
+
+			// If no regex match, try keyword-based extraction
+			if entities[entityName] == "" {
+				value := p.extractEntityByKeywords(text, entityName, entity)
+				if value != "" {
+					entities[entityName] = value
+				}
+			}
+		}
+	}
+
+	// Extract other entities
+	for entityName, entity := range p.config.Entities {
+		if entityName == "name" || entityName == "title" {
+			continue // Already processed
+		}
+
 		// Try regex patterns first
 		for _, re := range p.compiled.EntityRegexes[entityName] {
 			matches := re.FindStringSubmatch(text)
@@ -342,20 +450,149 @@ func (p *EnhancedLocalProvider) extractEntities(text string) map[string]string {
 func (p *EnhancedLocalProvider) extractEntityByKeywords(text, entityName string, entity models.EntityPattern) string {
 	words := strings.Fields(text)
 
-	for i, word := range words {
-		wordLower := strings.ToLower(word)
+	// Only use keyword-based extraction for specific entity types that have clear patterns
+	switch entityName {
+	case "name":
+		// First try to extract names in quotes (most reliable)
+		quotePattern := regexp.MustCompile(`"([^"]+)"`)
+		matches := quotePattern.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			return matches[1]
+		}
 
-		// Check if this word is a keyword for the entity
-		for _, keyword := range entity.Keywords {
-			if strings.Contains(wordLower, strings.ToLower(keyword)) {
-				// Look for the entity value after the keyword
+		// Look for name patterns like "named John", "contact Alice", "for Bob"
+		for i, word := range words {
+			wordLower := strings.ToLower(word)
+			if wordLower == "named" || wordLower == "name" || wordLower == "contact" || wordLower == "person" {
 				if i+1 < len(words) {
-					nextWord := words[i+1]
-					// Clean the word
-					nextWord = strings.Trim(nextWord, ".,!?;:")
-					if len(nextWord) > 0 {
+					nextWord := strings.Trim(words[i+1], ".,!?;:")
+					// Check if it looks like a name (starts with capital letter, not a common word)
+					if len(nextWord) > 0 && unicode.IsUpper(rune(nextWord[0])) && !p.isStopWord(strings.ToLower(nextWord)) {
+						// Only take the first word if it's followed by "with" or other indicators
+						if i+2 < len(words) && strings.ToLower(words[i+2]) == "with" {
+							return nextWord
+						}
+						// Check if next word is a stop word or indicator
+						if i+2 < len(words) {
+							nextNextWord := strings.ToLower(words[i+2])
+							if nextNextWord == "with" || nextNextWord == "email" || nextNextWord == "phone" {
+								return nextWord
+							}
+						}
 						return nextWord
 					}
+				}
+			}
+		}
+
+	case "email":
+		// Look for email patterns like "email alice@example.com"
+		for i, word := range words {
+			wordLower := strings.ToLower(word)
+			if wordLower == "email" || wordLower == "e-mail" || wordLower == "mail" {
+				if i+1 < len(words) {
+					nextWord := strings.Trim(words[i+1], ".,!?;:")
+					// Check if it looks like an email
+					if strings.Contains(nextWord, "@") && strings.Contains(nextWord, ".") {
+						return nextWord
+					}
+				}
+			}
+		}
+
+	case "phone":
+		// Look for phone patterns like "phone 555-123-4567"
+		for i, word := range words {
+			wordLower := strings.ToLower(word)
+			if wordLower == "phone" || wordLower == "mobile" || wordLower == "cell" {
+				if i+1 < len(words) {
+					nextWord := strings.Trim(words[i+1], ".,!?;:")
+					// Check if it looks like a phone number (contains digits and possibly dashes/parentheses)
+					if strings.ContainsAny(nextWord, "0123456789") && (strings.Contains(nextWord, "-") || strings.Contains(nextWord, "(") || len(nextWord) >= 10) {
+						return nextWord
+					}
+				}
+			}
+		}
+
+	case "date":
+		// Look for date patterns like "tomorrow", "today", "next week"
+		for _, word := range words {
+			wordLower := strings.ToLower(strings.Trim(word, ".,!?;:"))
+			if wordLower == "today" || wordLower == "tomorrow" || wordLower == "yesterday" {
+				return wordLower
+			}
+		}
+
+	case "time":
+		// Look for time patterns like "at 2pm", "at 3:30"
+		for i, word := range words {
+			wordLower := strings.ToLower(word)
+			if wordLower == "at" {
+				if i+1 < len(words) {
+					nextWord := strings.Trim(words[i+1], ".,!?;:")
+					// Check if it looks like a time (contains digits and possibly : or am/pm)
+					if strings.ContainsAny(nextWord, "0123456789") && (strings.Contains(nextWord, ":") || strings.Contains(strings.ToLower(nextWord), "am") || strings.Contains(strings.ToLower(nextWord), "pm")) {
+						return nextWord
+					}
+				}
+			}
+		}
+
+	case "location":
+		// Look for location patterns like "in New York", "at the office"
+		for i, word := range words {
+			wordLower := strings.ToLower(word)
+			if wordLower == "in" || wordLower == "at" {
+				if i+1 < len(words) {
+					nextWord := strings.Trim(words[i+1], ".,!?;:")
+					// Check if it looks like a location (starts with capital letter, not a common word)
+					if len(nextWord) > 0 && unicode.IsUpper(rune(nextWord[0])) && !p.isStopWord(strings.ToLower(nextWord)) {
+						return nextWord
+					}
+				}
+			}
+		}
+
+	case "title":
+		// First try to extract titles in quotes (most reliable)
+		quotePattern := regexp.MustCompile(`"([^"]+)"`)
+		matches := quotePattern.FindStringSubmatch(text)
+		if len(matches) > 1 {
+			return matches[1]
+		}
+
+		// Look for title patterns like "called buy groceries", "for team meeting"
+		for i, word := range words {
+			wordLower := strings.ToLower(word)
+			if wordLower == "called" || wordLower == "titled" || wordLower == "named" || wordLower == "for" {
+				// Collect all words after the keyword until we hit a stop word or punctuation
+				var titleWords []string
+				for j := i + 1; j < len(words); j++ {
+					nextWord := strings.Trim(words[j], ".,!?;:")
+					if len(nextWord) == 0 {
+						continue
+					}
+					nextWordLower := strings.ToLower(nextWord)
+
+					// Stop if we hit a stop word or time/date indicator
+					if p.isStopWord(nextWordLower) ||
+						nextWordLower == "tomorrow" ||
+						nextWordLower == "today" ||
+						nextWordLower == "yesterday" ||
+						nextWordLower == "at" ||
+						nextWordLower == "with" ||
+						nextWordLower == "email" ||
+						nextWordLower == "phone" ||
+						nextWordLower == "on" ||
+						nextWordLower == "in" ||
+						nextWordLower == "to" {
+						break
+					}
+					titleWords = append(titleWords, nextWord)
+				}
+				if len(titleWords) > 0 {
+					return strings.Join(titleWords, " ")
 				}
 			}
 		}
