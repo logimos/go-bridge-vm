@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  myllm:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      # AI Provider Configuration
+      - AI_PROVIDER=enhanced_local
+      - INTENT_CONFIG_PATH=configs/personal_assistant.json
+      - AI_TEMPERATURE=0.1
+      - AI_MAX_TOKENS=1000
+      
+      # Optional: Override with different provider
+      # - AI_PROVIDER=openai
+      # - OPENAI_API_KEY=your-api-key-here
+      # - AI_MODEL=gpt-3.5-turbo
+      
+      # Optional: Override config path
+      # - INTENT_CONFIG_PATH=configs/custom_config.json
+    volumes:
+      # Optional: Mount custom config files
+      # - ./custom_configs:/app/configs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/v1/debug"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s 
